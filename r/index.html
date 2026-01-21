@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هدية خاصة</title>
+    <style>
+        /* CSS للتنسيق والألوان */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F8FDCF; /* لون ليموني فاتح */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* لمنع ظهور scrollbar إذا كانت المحتويات أكبر */
+            direction: rtl; /* لجعل النص يبدأ من اليمين ليتناسب مع اللغة العربية */
+        }
+
+        /* تنسيق صندوق الهدية */
+        .gift-box-container {
+            cursor: pointer; /* لإظهار أن العنصر قابل للنقر */
+            position: relative;
+            animation: bounce 2s infinite ease-in-out; /* إضافة حركة ارتداد لطيفة */
+        }
+
+        .gift-box {
+            width: 200px;
+            height: 150px;
+            background-color: #E74C3C; /* لون أحمر للهدية */
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .gift-box::before { /* الغطاء العلوي للهدية */
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background-color: #C0392B; /* لون أغمق للغطاء */
+            border-radius: 10px 10px 0 0;
+        }
+
+        .ribbon { /* الشريط الذهبي */
+            position: absolute;
+            background-color: #F1C40F; /* لون ذهبي */
+        }
+
+        .ribbon.vertical {
+            width: 40px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ribbon.horizontal {
+            width: 100%;
+            height: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .bow { /* عقدة الشريط */
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 50px;
+            background-color: #F1C40F; /* لون ذهبي */
+            border-radius: 50%;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
+        }
+
+        .bow::before, .bow::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #F1C40F;
+            border-radius: 50%;
+            top: 5px;
+        }
+
+        .bow::before {
+            left: -10px;
+            transform: rotate(-30deg);
+        }
+
+        .bow::after {
+            right: -10px;
+            transform: rotate(30deg);
+        }
+
+        /* حركة الارتداد للهدية */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* تنسيق الرسالة المنبثقة (Pop-up) */
+        .message-box {
+            display: none; /* مخفي بشكل افتراضي */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            line-height: 1.6;
+            z-index: 1000; /* للتأكد من أنها تظهر فوق كل شيء */
+            border: 1px solid #ddd;
+        }
+
+        .message-box p {
+            margin: 0;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: #555;
+        }
+
+        /* Overlay لتعتيم الخلفية عند ظهور الرسالة */
+        .overlay {
+            display: none; /* مخفي بشكل افتراضي */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* تعتيم خفيف */
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gift-box-container" onclick="showMessage()">
+        <div class="gift-box">
+            <div class="ribbon vertical"></div>
+            <div class="ribbon horizontal"></div>
+            <div class="bow"></div>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="hideMessage()"></div>
+
+    <div class="message-box" id="messageBox">
+        <button class="close-button" onclick="hideMessage()">×</button>
+        <p>
+            التّم تعتنقُ الأَصْ ورفيفُ سَاشَى حانَ همي الشَّائِنُ الاماضر..........!٢.
+            </p>
+    </div>
+
+    <script>
+        // JavaScript لإظهار وإخفاء الرسالة
+        function showMessage() {
+            document.getElementById('messageBox').style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+        }
+
+        function hideMessage() {
+            document.getElementById('messageBox').style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
