@@ -17,12 +17,12 @@
             direction: rtl;
         }
 
-        /* تنسيق صندوق الهدية */
+        /* حاوية الهدية - تأكدنا أنها فوق كل شيء قبل النقر */
         .gift-box-container {
             cursor: pointer;
             position: relative;
             animation: bounce 2s infinite ease-in-out;
-            z-index: 10;
+            z-index: 100; /* رفعنا الطبقة لتكون قابلة للنقر */
         }
 
         .gift-box {
@@ -75,49 +75,48 @@
             border-radius: 50%;
         }
 
-        /* تأثير القلوب المتحركة */
+        /* قلوب متطايرة */
         .heart {
             position: absolute;
-            color: #e74c3c;
-            font-size: 20px;
-            user-select: none;
-            pointer-events: none;
-            z-index: 1001;
-            animation: moveUp 2s ease-out forwards;
+            font-size: 25px;
+            pointer-events: none; /* لكي لا تعيق النقر */
+            z-index: 2000;
+            animation: fly 1.5s ease-out forwards;
         }
 
-        @keyframes moveUp {
+        @keyframes fly {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+            100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; }
         }
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            50% { transform: translateY(-20px); }
         }
 
+        /* نافذة الرسالة */
         .message-box {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            background: white;
             padding: 40px;
-            width: 300px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 3000;
             text-align: center;
-            z-index: 1000;
+            min-width: 250px;
         }
 
         .message-box p {
-            font-size: 2em;
+            font-size: 2.5rem;
             color: #E74C3C;
-            font-weight: bold;
             margin: 0;
         }
 
+        /* تعتيم الخلفية */
         .overlay {
             display: none;
             position: fixed;
@@ -125,8 +124,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            background: rgba(0,0,0,0.6);
+            z-index: 2500;
         }
     </style>
 </head>
@@ -140,50 +139,44 @@
         </div>
     </div>
 
-    <div class="overlay" onclick="hideMessage()"></div>
+    <div class="overlay" id="overlay" onclick="hideMessage()"></div>
 
     <div class="message-box" id="messageBox">
         <p>❤️ أحبك ❤️</p>
     </div>
 
     <script>
-        function openGift(event) {
-            // إظهار الرسالة
+        function openGift(e) {
+            // إظهار الرسالة والخلفية السوداء
             document.getElementById('messageBox').style.display = 'block';
-            document.querySelector('.overlay').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
 
-            // إنشاء تأثير القلوب
-            for (let i = 0; i < 20; i++) {
-                createHeart(event.clientX, event.clientY);
+            // توليد قلوب في مكان النقر
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '❤️';
+                
+                // حسابات الحركة العشوائية
+                const x = (Math.random() - 0.5) * 300;
+                const y = (Math.random() - 0.5) * 300;
+                
+                heart.style.left = e.clientX + 'px';
+                heart.style.top = e.clientY + 'px';
+                heart.style.setProperty('--x', ${x}px);
+                heart.style.setProperty('--y', ${y}px);
+                
+                document.body.appendChild(heart);
+                
+                // حذف القلب بعد انتهاء الحركة لتخفيف العبء على المتصفح
+                setTimeout(() => heart.remove(), 1500);
             }
-        }
-
-        function createHeart(x, y) {
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
-            heart.innerHTML = '❤️';
-            document.body.appendChild(heart);
-
-            // تحديد اتجاهات عشوائية للقلوب
-            const moveX = (Math.random() - 0.5) * 400;
-            const moveY = (Math.random() - 0.5) * 400;
-            
-            heart.style.left = x + 'px';
-            heart.style.top = y + 'px';
-            heart.style.setProperty('--x', ${moveX}px);
-            heart.style.setProperty('--y', ${moveY}px);
-
-            // إزالة القلب من الصفحة بعد انتهاء الحركة
-            setTimeout(() => {
-                heart.remove();
-            }, 2000);
         }
 
         function hideMessage() {
             document.getElementById('messageBox').style.display = 'none';
-            document.querySelector('.overlay').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         }
     </script>
-
 </body>
 </html>
