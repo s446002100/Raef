@@ -5,49 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>هدية خاصة</title>
     <style>
+        /* CSS للتنسيق والألوان */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #F8FDCF;
+            background-color: #F8FDCF; /* لون ليموني فاتح */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
-            direction: rtl;
+            overflow: hidden; /* لمنع ظهور scrollbar إذا كانت المحتويات أكبر */
+            direction: rtl; /* لجعل النص يبدأ من اليمين ليتناسب مع اللغة العربية */
         }
 
-        /* حاوية الهدية - تأكدنا أنها فوق كل شيء قبل النقر */
+        /* تنسيق صندوق الهدية */
         .gift-box-container {
-            cursor: pointer;
+            cursor: pointer; /* لإظهار أن العنصر قابل للنقر */
             position: relative;
-            animation: bounce 2s infinite ease-in-out;
-            z-index: 100; /* رفعنا الطبقة لتكون قابلة للنقر */
+            animation: bounce 2s infinite ease-in-out; /* إضافة حركة ارتداد لطيفة */
         }
 
         .gift-box {
             width: 200px;
             height: 150px;
-            background-color: #E74C3C;
+            background-color: #E74C3C; /* لون أحمر للهدية */
             border-radius: 10px;
             position: relative;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .gift-box::before {
+        .gift-box::before { /* الغطاء العلوي للهدية */
             content: '';
             position: absolute;
             top: -30px;
             left: 0;
             width: 100%;
             height: 40px;
-            background-color: #C0392B;
+            background-color: #C0392B; /* لون أغمق للغطاء */
             border-radius: 10px 10px 0 0;
         }
 
-        .ribbon {
+        .ribbon { /* الشريط الذهبي */
             position: absolute;
-            background-color: #F1C40F;
+            background-color: #F1C40F; /* لون ذهبي */
         }
 
         .ribbon.vertical {
@@ -64,74 +64,100 @@
             transform: translateY(-50%);
         }
 
-        .bow {
+        .bow { /* عقدة الشريط */
             position: absolute;
             top: -45px;
             left: 50%;
             transform: translateX(-50%);
             width: 80px;
             height: 50px;
+            background-color: #F1C40F; /* لون ذهبي */
+            border-radius: 50%;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
+        }
+
+        .bow::before, .bow::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
             background-color: #F1C40F;
             border-radius: 50%;
+            top: 5px;
         }
 
-        /* قلوب متطايرة */
-        .heart {
-            position: absolute;
-            font-size: 25px;
-            pointer-events: none; /* لكي لا تعيق النقر */
-            z-index: 2000;
-            animation: fly 1.5s ease-out forwards;
+        .bow::before {
+            left: -10px;
+            transform: rotate(-30deg);
         }
 
-        @keyframes fly {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; }
+        .bow::after {
+            right: -10px;
+            transform: rotate(30deg);
         }
 
+        /* حركة الارتداد للهدية */
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
-        /* نافذة الرسالة */
+        /* تنسيق الرسالة المنبثقة (Pop-up) */
         .message-box {
-            display: none;
+            display: none; /* مخفي بشكل افتراضي */
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            z-index: 3000;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            padding: 30px;
+            max-width: 400px;
             text-align: center;
-            min-width: 250px;
+            line-height: 1.6;
+            z-index: 1000; /* للتأكد من أنها تظهر فوق كل شيء */
+            border: 1px solid #ddd;
         }
 
         .message-box p {
-            font-size: 2.5rem;
-            color: #E74C3C;
             margin: 0;
+            font-size: 1.1em;
+            color: #333;
         }
 
-        /* تعتيم الخلفية */
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: #555;
+        }
+
+        /* Overlay لتعتيم الخلفية عند ظهور الرسالة */
         .overlay {
-            display: none;
+            display: none; /* مخفي بشكل افتراضي */
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 2500;
+            background-color: rgba(0, 0, 0, 0.5); /* تعتيم خفيف */
+            z-index: 999;
         }
     </style>
 </head>
 <body>
 
-    <div class="gift-box-container" onclick="openGift(event)">
+    <div class="gift-box-container" onclick="showMessage()">
         <div class="gift-box">
             <div class="ribbon vertical"></div>
             <div class="ribbon horizontal"></div>
@@ -139,44 +165,27 @@
         </div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="hideMessage()"></div>
+    <div class="overlay" onclick="hideMessage()"></div>
 
     <div class="message-box" id="messageBox">
-        <p>❤️ أحبك ❤️</p>
+        <button class="close-button" onclick="hideMessage()">×</button>
+        <p>
+            وما الأخت إلا اتكاء روحٌ على روح وغيمٌ يُجاورك مَدى العُمر
+            </p>
     </div>
 
     <script>
-        function openGift(e) {
-            // إظهار الرسالة والخلفية السوداء
+        // JavaScript لإظهار وإخفاء الرسالة
+        function showMessage() {
             document.getElementById('messageBox').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-
-            // توليد قلوب في مكان النقر
-            for (let i = 0; i < 15; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.innerHTML = '❤️';
-                
-                // حسابات الحركة العشوائية
-                const x = (Math.random() - 0.5) * 300;
-                const y = (Math.random() - 0.5) * 300;
-                
-                heart.style.left = e.clientX + 'px';
-                heart.style.top = e.clientY + 'px';
-                heart.style.setProperty('--x', ${x}px);
-                heart.style.setProperty('--y', ${y}px);
-                
-                document.body.appendChild(heart);
-                
-                // حذف القلب بعد انتهاء الحركة لتخفيف العبء على المتصفح
-                setTimeout(() => heart.remove(), 1500);
-            }
+            document.querySelector('.overlay').style.display = 'block';
         }
 
         function hideMessage() {
             document.getElementById('messageBox').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
         }
     </script>
+
 </body>
 </html>
