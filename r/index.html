@@ -5,49 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>هدية خاصة</title>
     <style>
-        /* CSS للتنسيق والألوان */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #F8FDCF; /* لون ليموني فاتح */
+            background-color: #F8FDCF;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden; /* لمنع ظهور scrollbar إذا كانت المحتويات أكبر */
-            direction: rtl; /* لجعل النص يبدأ من اليمين ليتناسب مع اللغة العربية */
+            overflow: hidden;
+            direction: rtl;
         }
 
         /* تنسيق صندوق الهدية */
         .gift-box-container {
-            cursor: pointer; /* لإظهار أن العنصر قابل للنقر */
+            cursor: pointer;
             position: relative;
-            animation: bounce 2s infinite ease-in-out; /* إضافة حركة ارتداد لطيفة */
+            animation: bounce 2s infinite ease-in-out;
+            z-index: 10;
         }
 
         .gift-box {
             width: 200px;
             height: 150px;
-            background-color: #E74C3C; /* لون أحمر للهدية */
+            background-color: #E74C3C;
             border-radius: 10px;
             position: relative;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .gift-box::before { /* الغطاء العلوي للهدية */
+        .gift-box::before {
             content: '';
             position: absolute;
             top: -30px;
             left: 0;
             width: 100%;
             height: 40px;
-            background-color: #C0392B; /* لون أغمق للغطاء */
+            background-color: #C0392B;
             border-radius: 10px 10px 0 0;
         }
 
-        .ribbon { /* الشريط الذهبي */
+        .ribbon {
             position: absolute;
-            background-color: #F1C40F; /* لون ذهبي */
+            background-color: #F1C40F;
         }
 
         .ribbon.vertical {
@@ -64,47 +64,40 @@
             transform: translateY(-50%);
         }
 
-        .bow { /* عقدة الشريط */
+        .bow {
             position: absolute;
             top: -45px;
             left: 50%;
             transform: translateX(-50%);
             width: 80px;
             height: 50px;
-            background-color: #F1C40F; /* لون ذهبي */
-            border-radius: 50%;
-            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
-        }
-
-        .bow::before, .bow::after {
-            content: '';
-            position: absolute;
-            width: 40px;
-            height: 40px;
             background-color: #F1C40F;
             border-radius: 50%;
-            top: 5px;
         }
 
-        .bow::before {
-            left: -10px;
-            transform: rotate(-30deg);
+        /* تأثير القلوب المتحركة */
+        .heart {
+            position: absolute;
+            color: #e74c3c;
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 1001;
+            animation: moveUp 2s ease-out forwards;
         }
 
-        .bow::after {
-            right: -10px;
-            transform: rotate(30deg);
+        @keyframes moveUp {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
         }
 
-        /* حركة الارتداد للهدية */
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
         }
 
-        /* تنسيق الرسالة المنبثقة (Pop-up) */
         .message-box {
-            display: none; /* مخفي بشكل افتراضي */
+            display: none;
             position: fixed;
             top: 50%;
             left: 50%;
@@ -112,52 +105,34 @@
             background-color: #ffffff;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            padding: 30px;
-            max-width: 400px;
+            padding: 40px;
+            width: 300px;
             text-align: center;
-            line-height: 1.6;
-            z-index: 1000; /* للتأكد من أنها تظهر فوق كل شيء */
-            border: 1px solid #ddd;
+            z-index: 1000;
         }
 
         .message-box p {
-            margin: 0;
-            font-size: 1.1em;
-            color: #333;
-        }
-
-        .close-button {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5em;
+            font-size: 2em;
+            color: #E74C3C;
             font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
+            margin: 0;
         }
 
-        .close-button:hover {
-            color: #555;
-        }
-
-        /* Overlay لتعتيم الخلفية عند ظهور الرسالة */
         .overlay {
-            display: none; /* مخفي بشكل افتراضي */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* تعتيم خفيف */
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
     </style>
 </head>
 <body>
 
-    <div class="gift-box-container" onclick="showMessage()">
+    <div class="gift-box-container" onclick="openGift(event)">
         <div class="gift-box">
             <div class="ribbon vertical"></div>
             <div class="ribbon horizontal"></div>
@@ -168,17 +143,40 @@
     <div class="overlay" onclick="hideMessage()"></div>
 
     <div class="message-box" id="messageBox">
-        <button class="close-button" onclick="hideMessage()">×</button>
-        <p>
-                 وما الأخت إلا اتكاء روحٌ على روح وغيمٌ يُجاورك مَدى العُمر
-            </p>
+        <p>❤️ أحبك ❤️</p>
     </div>
 
     <script>
-        // JavaScript لإظهار وإخفاء الرسالة
-        function showMessage() {
+        function openGift(event) {
+            // إظهار الرسالة
             document.getElementById('messageBox').style.display = 'block';
             document.querySelector('.overlay').style.display = 'block';
+
+            // إنشاء تأثير القلوب
+            for (let i = 0; i < 20; i++) {
+                createHeart(event.clientX, event.clientY);
+            }
+        }
+
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            document.body.appendChild(heart);
+
+            // تحديد اتجاهات عشوائية للقلوب
+            const moveX = (Math.random() - 0.5) * 400;
+            const moveY = (Math.random() - 0.5) * 400;
+            
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            heart.style.setProperty('--x', ${moveX}px);
+            heart.style.setProperty('--y', ${moveY}px);
+
+            // إزالة القلب من الصفحة بعد انتهاء الحركة
+            setTimeout(() => {
+                heart.remove();
+            }, 2000);
         }
 
         function hideMessage() {
