@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sky Juggler</title>
+<style>
+body{
+margin:0;
+overflow:hidden;
+font-family:Tahoma;
+background:linear-gradient(180deg,#74ebd5,#ACB6E5);
+}
+#ui{
+position:absolute;
+top:10px;
+width:100%;
+display:flex;
+justify-content:space-around;
+color:#222;
+font-size:16px;
+z-index:10;
+}
+.card{
+background:rgba(255,255,255,0.85);
+padding:6px 14px;
+border-radius:20px;
+}
+#start, #result{
+position:absolute;
+inset:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+#start{background:linear-gradient(180deg,#ffecd2,#fcb69f);}
+#result{background:linear-gradient(180deg,#ffecd2,#fcb69f); display:none;}
+input{padding:10px;border-radius:20px;border:none;font-size:16px;text-align:center;}
+button{
+padding:12px 30px;margin-top:10px;font-size:16px;border:none;border-radius:30px;background:#ff9800;color:white;
+cursor:pointer;
+}
+select{padding:8px 12px;border-radius:20px;border:none;margin-top:10px;font-size:16px;}
+#flash{position:absolute;inset:0;background:red;opacity:0;pointer-events:none;transition:0.1s;}
+#comboText{
+position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+font-size:50px;color:yellow;text-shadow:0 0 20px orange;display:none;
+}
+canvas{display:block;}
+</style>
+</head>
+<body>
+
+<div id="ui">
+<div class="card">👤 <span id="playerName">لاعب</span></div>
+<div class="card">⭐ <span id="score">0</span></div>
+<div class="card">❤️ <span id="lives">3</span></div>
+<div class="card">🏆 <span id="best">0</span></div>
+<div class="card"><button onclick="toggleSound()" id="soundBtn">🔊</button></div>
+<div class="card">
+<select id="paddleShape" onchange="changePaddleShape()">
+<option value="rect">▭ المضرب المستطيل</option>
+<option value="round">⚪ المضرب الدائري</option>
+<option value="triangle">🔺 المضرب مثلث</option>
+</select>
+</div>
+</div>
+
+<div id="start">
+<h1>🎮 Sky Juggler</h1>
+<p>اكتب اسمك:</p>
+<input id="nameInput" placeholder="اسم اللاعب">
+<button onclick="startGame()">ابدأ اللعب</button>
+</div>
+
+<div id="result">
+<h1>📊 نتائجك</h1>
+<p>الكرات التي التقطتها: <span id="rBalls"></span></p>
+<p>الوقت: <span id="rTime"></span> ثانية</p>
+<p>الكرات التي خسرتها: <span id="rLost"></span></p>
+<button onclick="startGame()">إعادة اللعب</button>
+</div>
+
+<div id="flash"></div>
+<div id="comboText">كومبو!</div>
+<canvas id="game"></canvas>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+let paddle={x:canvas.width/2-60,y:canvas.height-90,w:120,h:18,shape:"rect"};
+let balls=[],particles=[];
+let score=0,lives=3,best=localStorage.getItem("best")||0;
+let gravity=0.08,spawnTimer=0,spawnDelay=60,playing=false;
+let startTime=0,caughtBalls=0,lostBalls=0;
+let muted=false;
+
+let combo=0; // عداد الكومبو
+const comboText=document.getElementById("comboText");
+
+document.getElementById("best").textContent=best;
+
+// أصوات
+const popSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+const failSound=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const comboSound=new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg"); // صوت كومبو
+const bgMusic=new Audio("https://actions.google.com/sounds/v1/ambiences/bouncy_game.ogg"); // موسيقى خلفية
+bgMusic.loop=true;
+
+function toggleSound(){
+muted=!muted;
+document.getElementById("soundBtn").textContent=muted?"🔇":"🔊";
+if(muted){bgMusic.pause();}else{if(playing) bgMusic.play();}
+}
+
+function playSound(s){if(!muted){s.currentTime=0;s.play();}}
+
+function randomColor(){let arr=["#ff1744","#00e5ff","#76ff03","#ffea00","#ff9100"]; return arr[Math.floor(Math.random()*arr.length)];}
+
+function spawnBall(){balls.push({x:Math.random()*canvas.width,y:-20,r:14,vy:1,color:randomColor(),gold:Math.random()<0.15});}
+
+function startGame(){
+let name=document.getElementById("nameInput").value||"لاعب";
+document.getElementById("playerName").textContent=name;
+balls=[];particles=[];score=0;lives=3;caughtBalls=0;lostBalls=0;gravity=0.08;spawnDelay=60;playing=true;startTime=Date.now();
+combo=0; comboText.style.display="none";
+document.getElementById("start").style.display="none";
+document.getElementById("result").style.display="none";
+if(!muted) bgMusic.play();
+loop();
+}
+
+function drawPaddle(){
+ctx.fillStyle="#333";
+switch(paddle.shape){
+case"rect": ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h); break;
+case"round": ctx.beginPath(); ctx.arc(paddle.x+paddle.w/2,paddle.y+paddle.h/2,paddle.w/2,0,Math.PI*2); ctx.fill(); break;
+case"triangle": ctx.beginPath(); ctx.moveTo(paddle.x,paddle.y+paddle.h); ctx.lineTo(paddle.x+paddle.w/2,paddle.y); ctx.lineTo(paddle.x+paddle.w,paddle.y+paddle.h); ctx.closePath(); ctx.fill(); break;
+}
+}
+
+function drawBalls(){balls.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle=b.gold?"gold":b.color;ctx.fill();});}
+function spawnParticles(x,y,color){for(let i=0;i<8;i++){particles.push({x,y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:20,color});}}
+function drawParticles(){for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,4,4);if(p.life<=0)particles.splice(i,1);}}
+function flashRed(){let f=document.getElementById("flash");f.style.opacity=0.4;setTimeout(()=>f.style.opacity=0,100);}
+
+function showCombo(){
+comboText.style.display="block";
+setTimeout(()=>comboText.style.display="none",800);
+playSound(comboSound);
+}
+
+function updateBalls(){
+spawnTimer++;
+if(spawnTimer>spawnDelay){spawnBall();spawnTimer=0;}
+for(let i=balls.length-1;i>=0;i--){
+let b=balls[i]; b.vy+=gravity; b.y+=b.vy;
+if(b.x>paddle.x && b.x<paddle.x+paddle.w && b.y+b.r>paddle.y && b.y<paddle.y+paddle.h){
+score+=b.gold?3:1; caughtBalls++; spawnParticles(b.x,b.y,b.gold?"gold":b.color); playSound(popSound); balls.splice(i,1);
+combo++; // زيادة الكومبو
+if(combo>=3) showCombo(); // كومبو >=3
+if(score%5==0){gravity+=0.02;if(spawnDelay>30) spawnDelay-=5;} continue;
+}
+if(b.y>canvas.height){balls.splice(i,1);lostBalls++;lives--;flashRed();playSound(failSound); combo=0; // إعادة الكومبو
+if(lives<=0){gameOver();return;}}
+}
+}
+
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);drawPaddle();drawBalls();drawParticles();}
+function updateUI(){document.getElementById("score").textContent=score;document.getElementById("lives").textContent=lives;}
+
+function gameOver(){
+playing=false; bgMusic.pause();
+let time=Math.floor((Date.now()-startTime)/1000);
+document.getElementById("rBalls").textContent=caughtBalls;
+document.getElementById("rTime").textContent=time;
+document.getElementById("rLost").textContent=lostBalls;
+if(score>best){best=score; localStorage.setItem("best",best);}
+document.getElementById("best").textContent=best;
+document.getElementById("result").style.display="flex";
+combo=0; comboText.style.display="none";
+}
+
+function loop(){if(!playing) return; draw();updateBalls();updateUI();requestAnimationFrame(loop);}
+function changePaddleShape(){paddle.shape=document.getElementById("paddleShape").value;}
+addEventListener("mousemove",e=>{paddle.x=e.clientX-paddle.w/2;});
+addEventListener("touchmove",e=>{paddle.x=e.touches[0].clientX-paddle.w/2;});
+</script>
+
+</body>
+</html>
+
