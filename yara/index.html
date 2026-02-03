@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌻ربوع خير</title>
+    <title>🌻 ربوع خير</title>
     <style>
         :root {
             --bg: #fdfaf1;
@@ -20,22 +20,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            overflow: hidden;
+            overflow-x: hidden; /* لمنع التمرير الأفقي */
         }
 
-        /* حاوية الزهرة */
+        /* حاوية الزهرة - تحسين الوضعية للموبايل والكمبيوتر */
         .sunflower-wrapper {
             position: absolute;
             bottom: -20px;
-            right: 8%;
+            right: 8%; /* وضعية الكمبيوتر */
             display: flex;
             flex-direction: column;
             align-items: center;
             animation: breeze 5s ease-in-out infinite;
             transform-origin: bottom center;
-            transition: animation-duration 0.5s;
+            transition: all 0.5s ease;
+            z-index: 1;
         }
 
         .flower-head {
@@ -58,7 +59,6 @@
             clip-path: ellipse(50% 50% at 50% 50%);
         }
 
-        /* توزيع 12 بتلة */
         .petal:nth-child(1) { transform: rotate(0deg); }
         .petal:nth-child(2) { transform: rotate(30deg); }
         .petal:nth-child(3) { transform: rotate(60deg); }
@@ -84,14 +84,14 @@
 
         .stem {
             width: 10px;
-            height: 200px;
+            height: 180px;
             background: var(--stem-green);
         }
 
         /* البطاقة */
         .message-card {
             background: var(--card-white);
-            padding: 35px;
+            padding: 30px;
             border-radius: 30px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.06);
             max-width: 400px;
@@ -99,11 +99,12 @@
             text-align: center;
             z-index: 20;
             backdrop-filter: blur(5px);
+            margin-bottom: 50px; /* لترك مساحة للزهرة في الجوال */
         }
 
         .message-content {
-            font-size: 1.15rem;
-            line-height: 1.7;
+            font-size: 1.1rem;
+            line-height: 1.8;
             color: #444;
             margin-bottom: 25px;
         }
@@ -111,7 +112,7 @@
         /* مشغل الموسيقى */
         .audio-player {
             background: #f1f1f1;
-            padding: 15px;
+            padding: 12px;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -121,7 +122,7 @@
         .controls {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         #playBtn {
@@ -132,10 +133,11 @@
             border-radius: 50%;
             color: white;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .progress-container {
@@ -155,7 +157,7 @@
         }
 
         .song-info {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #777;
             display: flex;
             justify-content: space-between;
@@ -166,9 +168,34 @@
             50% { transform: rotate(3deg); }
         }
 
-        /* حركة تفاعلية عند تشغيل الموسيقى */
         .playing-anim {
             animation-duration: 1.5s !important;
+        }
+
+        /* --- تعديلات خاصة بشاشات الجوال --- */
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+                padding-top: 20px;
+            }
+            
+            .message-card {
+                width: 80%;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .sunflower-wrapper {
+                position: relative; /* تصبح جزء من تدفق الصفحة */
+                right: auto;
+                bottom: 0;
+                margin-top: 20px;
+                transform: scale(0.8); /* تصغير الزهرة قليلاً لتناسب الشاشة */
+            }
+
+            .stem {
+                height: 120px; /* تقصير الساق في الجوال */
+            }
         }
     </style>
 </head>
@@ -176,13 +203,13 @@
 
     <div class="message-card">
         <p class="message-content">
-             <br> مثلما يركض دوار الشمس وراء شمسه 
-             اركض لك بقلبي ورحي وبكل ما لديي
-             انتي شمس ونور لي بهذه الحياه 
-            <br> 
-            يارا منجد ما اقدر اعيش بدونك  
-            <br> 
-            احبببك ياشمس حياتي
+            مثلما يركض دوار الشمس وراء شمسه <br>
+            اركض لك بقلبي وروحي وبكل ما لدي 
+            انتي شمس ونور لي بهذه الحياة 
+            <br>
+            يارا منجد ما اقدر اعيش بدونك 
+            <br>
+            احبببك يا شمس حياتي
         </p>
 
         <div class="audio-player">
@@ -198,7 +225,7 @@
             </div>
         </div>
         <audio id="myAudio" src="awadiny.mp3"></audio> 
-        </div>
+    </div>
 
     <div class="sunflower-wrapper" id="sunflower">
         <div class="flower-head">
@@ -232,20 +259,24 @@
         });
 
         audio.addEventListener('timeupdate', () => {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percent + '%';
-            
-            let mins = Math.floor(audio.currentTime / 60);
-            let secs = Math.floor(audio.currentTime % 60);
-            if (secs < 10) secs = '0' + secs;
-            timeDisplay.innerText = `${mins}:${secs}`;
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + '%';
+                
+                let mins = Math.floor(audio.currentTime / 60);
+                let secs = Math.floor(audio.currentTime % 60);
+                if (secs < 10) secs = '0' + secs;
+                timeDisplay.innerText = `${mins}:${secs}`;
+            }
         });
 
         progressCont.addEventListener('click', (e) => {
             const width = progressCont.clientWidth;
             const clickX = e.offsetX;
             const duration = audio.duration;
-            audio.currentTime = (clickX / width) * duration;
+            if (duration) {
+                audio.currentTime = (clickX / width) * duration;
+            }
         });
     </script>
 </body>
