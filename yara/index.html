@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌻ربوع خير</title>
+    <style>
+        :root {
+            --bg: #fdfaf1;
+            --sun-yellow: #ffc107;
+            --sun-orange: #ff9800;
+            --dark-center: #5d4037;
+            --stem-green: #7ca661;
+            --card-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        /* حاوية الزهرة */
+        .sunflower-wrapper {
+            position: absolute;
+            bottom: -20px;
+            right: 8%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: breeze 5s ease-in-out infinite;
+            transform-origin: bottom center;
+            transition: animation-duration 0.5s;
+        }
+
+        .flower-head {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .petal {
+            position: absolute;
+            width: 30px;
+            height: 80px;
+            background: linear-gradient(to top, var(--sun-yellow), var(--sun-orange));
+            border-radius: 50% 50% 0 0;
+            transform-origin: bottom center;
+            bottom: 50px;
+            clip-path: ellipse(50% 50% at 50% 50%);
+        }
+
+        /* توزيع 12 بتلة */
+        .petal:nth-child(1) { transform: rotate(0deg); }
+        .petal:nth-child(2) { transform: rotate(30deg); }
+        .petal:nth-child(3) { transform: rotate(60deg); }
+        .petal:nth-child(4) { transform: rotate(90deg); }
+        .petal:nth-child(5) { transform: rotate(120deg); }
+        .petal:nth-child(6) { transform: rotate(150deg); }
+        .petal:nth-child(7) { transform: rotate(180deg); }
+        .petal:nth-child(8) { transform: rotate(210deg); }
+        .petal:nth-child(9) { transform: rotate(240deg); }
+        .petal:nth-child(10) { transform: rotate(270deg); }
+        .petal:nth-child(11) { transform: rotate(300deg); }
+        .petal:nth-child(12) { transform: rotate(330deg); }
+
+        .center {
+            width: 60px;
+            height: 60px;
+            background-color: var(--dark-center);
+            background-image: radial-gradient(#3e2723 20%, transparent 20%);
+            background-size: 6px 6px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .stem {
+            width: 10px;
+            height: 200px;
+            background: var(--stem-green);
+        }
+
+        /* البطاقة */
+        .message-card {
+            background: var(--card-white);
+            padding: 35px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            max-width: 400px;
+            width: 85%;
+            text-align: center;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+        }
+
+        .message-content {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #444;
+            margin-bottom: 25px;
+        }
+
+        /* مشغل الموسيقى */
+        .audio-player {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #playBtn {
+            background: var(--sun-orange);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        #progressBar {
+            height: 100%;
+            background: var(--sun-orange);
+            width: 0%;
+            border-radius: 3px;
+        }
+
+        .song-info {
+            font-size: 0.85rem;
+            color: #777;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @keyframes breeze {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        /* حركة تفاعلية عند تشغيل الموسيقى */
+        .playing-anim {
+            animation-duration: 1.5s !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="message-card">
+        <p class="message-content">
+             <br> مثلما يركض دوار الشمس وراء شمسه 
+             اركض لك بقلبي ورحي وبكل ما لديي
+             انتي شمس ونور لي بهذه الحياه              
+        </p>
+
+        <div class="audio-player">
+            <div class="controls">
+                <button id="playBtn">▶</button>
+                <div class="progress-container" id="progressCont">
+                    <div id="progressBar"></div>
+                </div>
+            </div>
+            <div class="song-info">
+                <span>أوعديني - رامي جمال</span>
+                <span id="time">00:00</span>
+            </div>
+        </div>
+        <audio id="myAudio" src="awadiny.mp3"></audio> 
+        </div>
+
+    <div class="sunflower-wrapper" id="sunflower">
+        <div class="flower-head">
+            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+            <div class="center"></div>
+        </div>
+        <div class="stem"></div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('myAudio');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressCont = document.getElementById('progressCont');
+        const timeDisplay = document.getElementById('time');
+        const sunflower = document.getElementById('sunflower');
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = '⏸';
+                sunflower.classList.add('playing-anim');
+            } else {
+                audio.pause();
+                playBtn.innerText = '▶';
+                sunflower.classList.remove('playing-anim');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + '%';
+            
+            let mins = Math.floor(audio.currentTime / 60);
+            let secs = Math.floor(audio.currentTime % 60);
+            if (secs < 10) secs = '0' + secs;
+            timeDisplay.innerText = `${mins}:${secs}`;
+        });
+
+        progressCont.addEventListener('click', (e) => {
+            const width = progressCont.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+    </script>
+</body>
+</html>
