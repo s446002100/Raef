@@ -3,281 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌻 ربوع خير</title>
+    <title>ربووع خيير</title>
     <style>
-        :root {
-            --bg: #fdfaf1;
-            --sun-yellow: #ffc107;
-            --sun-orange: #ff9800;
-            --dark-center: #5d4037;
-            --stem-green: #7ca661;
-            --card-white: rgba(255, 255, 255, 0.9);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;600&display=swap');
 
         body {
-            background-color: var(--bg);
             margin: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            overflow-x: hidden; /* لمنع التمرير الأفقي */
+            background: #fffafa;
+            font-family: 'Cairo', sans-serif;
+            overflow: hidden;
         }
 
-        /* حاوية الزهرة - تحسين الوضعية للموبايل والكمبيوتر */
-        .sunflower-wrapper {
-            position: absolute;
-            bottom: -20px;
-            right: 8%; /* وضعية الكمبيوتر */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: breeze 5s ease-in-out infinite;
-            transform-origin: bottom center;
-            transition: all 0.5s ease;
-            z-index: 1;
-        }
-
-        .flower-head {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        /* البتلات */
         .petal {
             position: absolute;
-            width: 30px;
-            height: 80px;
-            background: linear-gradient(to top, var(--sun-yellow), var(--sun-orange));
-            border-radius: 50% 50% 0 0;
-            transform-origin: bottom center;
-            bottom: 50px;
-            clip-path: ellipse(50% 50% at 50% 50%);
+            top: -20px;
+            pointer-events: none;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        .petal:nth-child(1) { transform: rotate(0deg); }
-        .petal:nth-child(2) { transform: rotate(30deg); }
-        .petal:nth-child(3) { transform: rotate(60deg); }
-        .petal:nth-child(4) { transform: rotate(90deg); }
-        .petal:nth-child(5) { transform: rotate(120deg); }
-        .petal:nth-child(6) { transform: rotate(150deg); }
-        .petal:nth-child(7) { transform: rotate(180deg); }
-        .petal:nth-child(8) { transform: rotate(210deg); }
-        .petal:nth-child(9) { transform: rotate(240deg); }
-        .petal:nth-child(10) { transform: rotate(270deg); }
-        .petal:nth-child(11) { transform: rotate(300deg); }
-        .petal:nth-child(12) { transform: rotate(330deg); }
-
-        .center {
-            width: 60px;
-            height: 60px;
-            background-color: var(--dark-center);
-            background-image: radial-gradient(#3e2723 20%, transparent 20%);
-            background-size: 6px 6px;
-            border-radius: 50%;
-            z-index: 10;
+        .audio-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 200;
+            background: #fff; border: 1px solid #ffd1dc;
+            padding: 8px 18px; border-radius: 30px; cursor: pointer;
+            font-size: 14px; color: #d81b60; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .stem {
-            width: 10px;
-            height: 180px;
-            background: var(--stem-green);
-        }
-
-        /* البطاقة */
-        .message-card {
-            background: var(--card-white);
-            padding: 30px;
-            border-radius: 30px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
-            max-width: 400px;
-            width: 85%;
-            text-align: center;
-            z-index: 20;
-            backdrop-filter: blur(5px);
-            margin-bottom: 50px; /* لترك مساحة للزهرة في الجوال */
-        }
-
-        .message-content {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #444;
-            margin-bottom: 25px;
-        }
-
-        /* مشغل الموسيقى */
-        .audio-player {
-            background: #f1f1f1;
-            padding: 12px;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        #playBtn {
-            background: var(--sun-orange);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .progress-container {
-            flex-grow: 1;
-            height: 6px;
-            background: #ddd;
-            border-radius: 3px;
+        /* الظرف */
+        .envelope {
             position: relative;
+            width: 320px;
+            height: 220px;
+            background: #f8d7da;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             cursor: pointer;
+            z-index: 10;
+            transition: 0.3s;
         }
 
-        #progressBar {
-            height: 100%;
-            background: var(--sun-orange);
-            width: 0%;
-            border-radius: 3px;
+        .flap {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 120px solid #f1b2b8;
+            transform-origin: top;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 40;
         }
 
-        .song-info {
-            font-size: 0.75rem;
-            color: #777;
-            display: flex;
-            justify-content: space-between;
+        .pocket {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid #f8d7da;
+            border-right: 160px solid #f8d7da;
+            border-bottom: 110px solid #f4c2c2;
+            border-top: 110px solid transparent;
+            border-radius: 0 0 12px 12px;
+            z-index: 30;
         }
 
-        @keyframes breeze {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(3deg); }
+        .rose-seal {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -10%);
+            font-size: 65px;
+            z-index: 50;
+            transition: 0.5s ease-in-out;
+            animation: heartBeat 2s infinite;
         }
 
-        .playing-anim {
-            animation-duration: 1.5s !important;
+        @keyframes heartBeat {
+            0%, 100% { transform: translate(-50%, -10%) scale(1); }
+            50% { transform: translate(-50%, -10%) scale(1.1); }
         }
 
-        /* --- تعديلات خاصة بشاشات الجوال --- */
-        @media (max-width: 600px) {
-            body {
-                flex-direction: column;
-                padding-top: 20px;
-            }
-            
-            .message-card {
-                width: 80%;
-                padding: 20px;
-                margin-bottom: 20px;
-            }
+        /* الرسالة */
+        .letter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 92%;
+            height: 85%;
+            background: white;
+            z-index: 5;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            text-align: center;
+            border-radius: 8px;
+            opacity: 0; /* مخفية بالكامل */
+            visibility: hidden;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
 
-            .sunflower-wrapper {
-                position: relative; /* تصبح جزء من تدفق الصفحة */
-                right: auto;
-                bottom: 0;
-                margin-top: 20px;
-                transform: scale(0.8); /* تصغير الزهرة قليلاً لتناسب الشاشة */
-            }
+        .letter h2 { font-family: 'Amiri', serif; color: #ad1457; margin: 0 0 15px 0; font-size: 1.8rem; }
+        .letter p { color: #444; font-size: 1.05rem; line-height: 1.8; margin: 0; }
 
-            .stem {
-                height: 120px; /* تقصير الساق في الجوال */
-            }
+        /* حركة الفتح والإغلاق */
+        .open .flap {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .open .letter {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -140%);
+            z-index: 60;
+        }
+
+        .open .rose-seal {
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, -120%) scale(0);
+        }
+
+        .hint {
+            position: absolute; bottom: -60px; width: 100%;
+            text-align: center; color: #d81b60; font-weight: 600; font-size: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="message-card">
-        <p class="message-content">
-            مثلما يركض تباع الشمس وراء شمسه <br>
-            اركض لك بقلبي وروحي وبكل ما لدي 
-            انتي شمس ونور لي بهذه الحياة 
-            <br>
-            يارا منجد ما اقدر اعيش بدونك 
-            <br>
-            احبببك يا شمس حياتي
-        </p>
+    <audio id="music" loop>
+        <source src="maaak.mp3" type="audio/mpeg">
+    </audio>
 
-        <div class="audio-player">
-            <div class="controls">
-                <button id="playBtn">▶</button>
-                <div class="progress-container" id="progressCont">
-                    <div id="progressBar"></div>
-                </div>
-            </div>
-            <div class="song-info">
-                <span>أوعديني - رامي جمال</span>
-                <span id="time">00:00</span>
-            </div>
-        </div>
-        <audio id="myAudio" src="awadiny.mp3"></audio> 
-    </div>
+    <button class="audio-btn" onclick="toggleMusic(event)">🎵</button>
 
-    <div class="sunflower-wrapper" id="sunflower">
-        <div class="flower-head">
-            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-            <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-            <div class="center"></div>
+    <div class="envelope" id="env" onclick="toggleEnvelope()">
+        <div class="rose-seal">🌸</div>
+        <div class="flap"></div>
+        <div class="pocket"></div>
+        <div class="letter" id="letter">
+            <h2>يارتي وحبيبتي </h2>
+            <p>
+                لم يكن وجودك في حياتي شيئا اعتدته<br>
+                 شعرت من خلالك بالدفئ والألفة<br> 
+                وتجسد فيي روحان احملها بصدري  <br>
+                روحاً لي ورحاً لكِ
+            </p>
+            <div style="font-size: 25px; margin-top: 15px;">✨</div>
         </div>
-        <div class="stem"></div>
+        <div class="hint" id="hintText">  اضغطي الورده يا ورده</div>
     </div>
 
     <script>
-        const audio = document.getElementById('myAudio');
-        const playBtn = document.getElementById('playBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressCont = document.getElementById('progressCont');
-        const timeDisplay = document.getElementById('time');
-        const sunflower = document.getElementById('sunflower');
+        let petalInterval;
 
-        playBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                playBtn.innerText = '⏸';
-                sunflower.classList.add('playing-anim');
+        function toggleEnvelope() {
+            const env = document.getElementById('env');
+            const music = document.getElementById('music');
+            const hint = document.getElementById('hintText');
+
+            if (!env.classList.contains('open')) {
+                // حالة الفتح
+                env.classList.add('open');
+                music.play();
+                hint.innerText = " ";
+                startPetals();
             } else {
-                audio.pause();
-                playBtn.innerText = '▶';
-                sunflower.classList.remove('playing-anim');
+                // حالة الإغلاق
+                env.classList.remove('open');
+                hint.innerText = "اضغطي الورده يا وردة";
+                stopPetals();
             }
-        });
+        }
 
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = percent + '%';
-                
-                let mins = Math.floor(audio.currentTime / 60);
-                let secs = Math.floor(audio.currentTime % 60);
-                if (secs < 10) secs = '0' + secs;
-                timeDisplay.innerText = `${mins}:${secs}`;
-            }
-        });
+        function toggleMusic(e) {
+            e.stopPropagation();
+            const m = document.getElementById('music');
+            if (m.paused) m.play(); else m.pause();
+        }
 
-        progressCont.addEventListener('click', (e) => {
-            const width = progressCont.clientWidth;
-            const clickX = e.offsetX;
-            const duration = audio.duration;
-            if (duration) {
-                audio.currentTime = (clickX / width) * duration;
-            }
-        });
+        function startPetals() {
+            if (petalInterval) return;
+            petalInterval = setInterval(() => {
+                const p = document.createElement('div');
+                p.classList.add('petal');
+                p.innerHTML = '🌸';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = Math.random() * 20 + 15 + 'px';
+                p.style.animationDuration = Math.random() * 3 + 4 + 's';
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 6000);
+            }, 350);
+        }
+
+        function stopPetals() {
+            clearInterval(petalInterval);
+            petalInterval = null;
+        }
     </script>
 </body>
 </html>
