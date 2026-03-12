@@ -15,18 +15,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
         
         body {
             font-family: 'Tajawal', sans-serif;
+            background-color: #fffcf0;
         }
 
         @keyframes yellow-glow-fade {
-            0%, 100% { filter: drop-shadow(0 0 20px #fbbf24); opacity: 0.4; transform: scale(1); }
+            0%, 100% { filter: drop-shadow(0 0 20px #fbbf24); opacity: 0.6; transform: scale(1); }
             50% { filter: drop-shadow(0 0 60px #fbbf24); opacity: 1; transform: scale(1.05); }
         }
         
@@ -35,15 +34,15 @@
         }
 
         @keyframes sun-simple-fade {
-            0%, 100% { opacity: 0.5; transform: scale(1); filter: drop-shadow(0 0 5px #fbbf24); }
+            0%, 100% { opacity: 0.7; transform: scale(1); filter: drop-shadow(0 0 5px #fbbf24); }
             50% { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 25px #fbbf24); }
         }
         
         .login-sun-emoji { 
             animation: sun-simple-fade 3s infinite ease-in-out; 
+            display: inline-block;
         }
 
-        /* Hide scrollbar but keep functionality */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -53,29 +52,33 @@
         }
     </style>
 </head>
-<body class="bg-[#fffcf0]">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Firebase Configuration ---
-        // Globals provided by the environment
-        const firebaseConfig = JSON.parse(__firebase_config);
-        firebase.initializeApp(firebaseConfig);
+        // دالة آمنة لجلب إعدادات Firebase
+        const getFirebaseConfig = () => {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    return JSON.parse(__firebase_config);
+                }
+            } catch (e) {
+                console.error("Firebase Config Error", e);
+            }
+            // إعدادات افتراضية فارغة لتجنب الانهيار عند التشغيل المحلي
+            return { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
+        };
+
+        const firebaseConfig = getFirebaseConfig();
+        if (firebaseConfig.apiKey) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Helper components for icons using SVG
-        const Icon = ({ name, className }) => {
-            useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            }, []);
-            return <i data-lucide={name} className={className}></i>;
-        };
 
         function App() {
             const [isAuthorized, setIsAuthorized] = useState(false);
@@ -94,8 +97,13 @@
 
             const inputRef = useRef(null);
 
-            // 1. Firebase Auth Logic
+            // 1. تسجيل الدخول التلقائي لـ Firebase
             useEffect(() => {
+                if (!firebaseConfig.apiKey) {
+                    setLoading(false);
+                    return;
+                }
+
                 const initAuth = async () => {
                     try {
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -110,14 +118,14 @@
                 initAuth();
                 const unsubscribe = auth.onAuthStateChanged((currUser) => {
                     setUser(currUser);
-                    if (currUser) setLoading(false);
+                    setLoading(false);
                 });
                 return () => unsubscribe();
             }, []);
 
-            // 2. Fetch Dedications
+            // 2. جلب الإهداءات (فقط للأدمن Raef)
             useEffect(() => {
-                if (!user || !isAuthorized) return;
+                if (!user || !isAuthorized || !firebaseConfig.apiKey) return;
                 
                 if (usernameInput === 'Raef') {
                     const q = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('eid_gifts');
@@ -130,8 +138,6 @@
                         console.error("Firestore Error:", err);
                     });
                     return () => unsubscribe();
-                } else {
-                    setDedications([]);
                 }
             }, [user, isAuthorized, usernameInput]);
 
@@ -150,7 +156,10 @@
 
             const handleSend = async (e) => {
                 e.preventDefault();
-                if (!text.trim() || !user) return;
+                if (!text.trim() || !user || !firebaseConfig.apiKey) {
+                    if (!firebaseConfig.apiKey) alert("لا يمكن الإرسال بدون إعدادات Firebase");
+                    return;
+                }
                 setIsSubmitting(true);
                 try {
                     await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('eid_gifts').add({
@@ -173,14 +182,14 @@
             };
 
             if (loading) return (
-                <div className="h-screen flex items-center justify-center bg-amber-50">
-                    <span className="text-6xl animate-spin">☀️</span>
+                <div className="h-screen flex items-center justify-center">
+                    <span className="text-7xl animate-spin">☀️</span>
                 </div>
             );
 
             if (!isAuthorized) {
                 return (
-                    <div className="h-screen bg-[#fff9eb] flex items-center justify-center p-4">
+                    <div className="h-screen flex items-center justify-center p-4">
                         <div className="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm border-2 border-amber-200 text-center">
                             <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
                                 <span className="text-7xl login-sun-emoji">☀️</span>
@@ -212,20 +221,20 @@
             }
 
             return (
-                <div className="min-h-screen bg-[#fffcf0] pb-20">
+                <div className="min-h-screen pb-20">
                     {isAdmin && (
                         <div className="bg-amber-500 text-white py-2 px-6 flex items-center justify-center gap-2 shadow-md sticky top-0 z-50">
-                            <Icon name="shield-check" className="w-4 h-4" />
-                            <span className="text-xs font-bold">وضع المسؤول: Raef - عرض كافة الإهداءات الخاصة</span>
+                            <span>🛡️</span>
+                            <span className="text-xs font-bold">وضع المسؤول: Raef - عرض كافة الإهداءات</span>
                         </div>
                     )}
 
                     <section className="pt-16 pb-8 text-center px-4">
                         <div className="inline-block bg-white/50 backdrop-blur-sm px-8 py-4 rounded-full border-2 border-amber-200 shadow-sm mb-4">
                             <h2 className="text-amber-600 font-bold tracking-[0.2em] flex items-center justify-center gap-2 text-sm md:text-base">
-                                <Icon name="sparkles" className="w-4 h-4" />
+                                <span>✨</span>
                                 فرحة العيد مع شمس الحياة
-                                <Icon name="sparkles" className="w-4 h-4" />
+                                <span>✨</span>
                             </h2>
                         </div>
                         <h1 className="text-4xl md:text-7xl font-black text-amber-800 drop-shadow-sm leading-tight">
@@ -247,7 +256,7 @@
                             onClick={() => setShowGiftMessage(!showGiftMessage)}
                             className="bg-amber-500 text-white px-12 py-5 rounded-full font-black text-xl md:text-3xl shadow-2xl hover:bg-amber-600 transition-all transform hover:scale-110 active:scale-95 flex items-center gap-4 border-4 border-white"
                         >
-                            <Icon name="gift" className="w-8 h-8" />
+                            <span>🎁</span>
                             رسالة الهدية
                         </button>
 
@@ -255,20 +264,20 @@
                             <div className="w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-amber-400 relative animate-in fade-in zoom-in duration-300">
                                 <button 
                                     onClick={() => setShowGiftMessage(false)}
-                                    className="absolute top-4 left-4 text-amber-400 hover:text-amber-600"
+                                    className="absolute top-4 left-4 text-amber-400 hover:text-amber-600 text-2xl"
                                 >
-                                    <Icon name="x" className="w-6 h-6" />
+                                    ✕
                                 </button>
                                 <div className="text-center">
-                                    <Icon name="sparkles" className="w-10 h-10 text-amber-500 mx-auto mb-4" />
+                                    <span className="text-5xl mb-4 block">✨</span>
                                     <h3 className="text-2xl font-black text-amber-800 mb-4">هدية خاصة لشمس الحياة</h3>
                                     <p className="text-slate-600 text-lg leading-relaxed italic">
                                         "بمناسبة العيد السعيد، أهديكِ أصدق الدعوات بأن تظلي شمساً تشرق في قلوبنا، وضياءً ينير دروبنا. كل عام وأنتِ العيد لكل من حولك."
                                     </p>
                                     <div className="mt-6 flex justify-center gap-2">
-                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce" />
-                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce delay-75" />
-                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce delay-150" />
+                                        <span className="text-2xl animate-bounce">❤️</span>
+                                        <span className="text-2xl animate-bounce" style={{animationDelay: '0.2s'}}>❤️</span>
+                                        <span className="text-2xl animate-bounce" style={{animationDelay: '0.4s'}}>❤️</span>
                                     </div>
                                 </div>
                             </div>
@@ -279,7 +288,7 @@
                         <div ref={inputRef} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-amber-100 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-amber-400 to-orange-500"></div>
                             <div className="flex items-center gap-3 mb-6 mt-2">
-                                <Icon name="moon" className="text-amber-500 fill-amber-500 w-6 h-6" />
+                                <span className="text-2xl">🌙</span>
                                 <h3 className="text-2xl font-black text-amber-900">اترك أثرك الجميل</h3>
                             </div>
                             
@@ -293,8 +302,8 @@
                                 />
                                 
                                 {showSuccess && (
-                                    <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 p-3 rounded-xl animate-in fade-in slide-in-from-top-1">
-                                        <Icon name="check-circle" className="w-5 h-5" />
+                                    <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 p-3 rounded-xl">
+                                        <span>✅</span>
                                         <span>تم إرسال إهدائك بنجاح وحفظه للمسؤول!</span>
                                     </div>
                                 )}
@@ -303,14 +312,14 @@
                                     disabled={isSubmitting}
                                     className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-200 text-white font-black py-5 rounded-2xl shadow-lg shadow-amber-200 transition-all flex items-center justify-center gap-3 text-xl"
                                 >
-                                    {isSubmitting ? <span className="animate-spin text-2xl text-white">⏳</span> : <Icon name="send" className="w-6 h-6 rotate-180" />}
+                                    {isSubmitting ? <span className="animate-spin text-2xl text-white">⏳</span> : <span>🚀</span>}
                                     حفظ الإهداء في الصفحة
                                 </button>
                             </form>
                         </div>
 
                         {isAdmin && (
-                            <div className="mt-20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="mt-20 space-y-8">
                                 <div className="flex items-center gap-4">
                                     <div className="h-[2px] bg-amber-200 flex-1"></div>
                                     <span className="text-amber-500 font-black text-sm tracking-widest px-4 py-1 bg-white border border-amber-100 rounded-full">سجل كافة الإهداءات الواردة</span>
@@ -326,7 +335,7 @@
                                         dedications.map((item) => (
                                             <div key={item.id} className="bg-white p-8 rounded-[2rem] shadow-md border-2 border-amber-50 hover:border-amber-200 transition-all relative group">
                                                 <div className="absolute -top-3 -right-3 bg-amber-500 text-white p-2 rounded-full shadow-lg">
-                                                    <Icon name="heart" className="w-4 h-4 fill-white" />
+                                                    <span>❤️</span>
                                                 </div>
                                                 <div className="flex justify-between items-start mb-4">
                                                     <span className="font-black text-xl text-amber-700 bg-amber-50 px-4 py-1 rounded-full border border-amber-100">{item.name}</span>
