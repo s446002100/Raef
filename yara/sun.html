@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شمس الحياة - تهنئة العيد</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        @keyframes yellow-glow-fade {
+            0%, 100% { filter: drop-shadow(0 0 20px #fbbf24); opacity: 0.4; transform: scale(1); }
+            50% { filter: drop-shadow(0 0 60px #fbbf24); opacity: 1; transform: scale(1.05); }
+        }
+        
+        .yellow-pulse-sun {
+            animation: yellow-glow-fade 4s infinite ease-in-out;
+        }
+
+        @keyframes sun-simple-fade {
+            0%, 100% { opacity: 0.5; transform: scale(1); filter: drop-shadow(0 0 5px #fbbf24); }
+            50% { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 25px #fbbf24); }
+        }
+        
+        .login-sun-emoji { 
+            animation: sun-simple-fade 3s infinite ease-in-out; 
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#fffcf0]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Firebase Configuration ---
+        // Globals provided by the environment
+        const firebaseConfig = JSON.parse(__firebase_config);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Helper components for icons using SVG
+        const Icon = ({ name, className }) => {
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, []);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        function App() {
+            const [isAuthorized, setIsAuthorized] = useState(false);
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [usernameInput, setUsernameInput] = useState('');
+            const [passwordInput, setPasswordInput] = useState('');
+            const [loginError, setLoginError] = useState('');
+            
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [dedications, setDedications] = useState([]);
+            const [text, setText] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [showGiftMessage, setShowGiftMessage] = useState(false);
+            const [showSuccess, setShowSuccess] = useState(false);
+
+            const inputRef = useRef(null);
+
+            // 1. Firebase Auth Logic
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (err) {
+                        console.error("Auth Error:", err);
+                    }
+                };
+                initAuth();
+                const unsubscribe = auth.onAuthStateChanged((currUser) => {
+                    setUser(currUser);
+                    if (currUser) setLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            // 2. Fetch Dedications
+            useEffect(() => {
+                if (!user || !isAuthorized) return;
+                
+                if (usernameInput === 'Raef') {
+                    const q = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('eid_gifts');
+                    
+                    const unsubscribe = q.onSnapshot((snapshot) => {
+                        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                        setDedications(data);
+                    }, (err) => {
+                        console.error("Firestore Error:", err);
+                    });
+                    return () => unsubscribe();
+                } else {
+                    setDedications([]);
+                }
+            }, [user, isAuthorized, usernameInput]);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                const isRaef = usernameInput === 'Raef';
+                const isSun = usernameInput === 'Sun of Life';
+
+                if ((isRaef || isSun) && passwordInput === '1427') {
+                    setIsAuthorized(true);
+                    setIsAdmin(isRaef);
+                } else {
+                    setLoginError('بيانات الدخول غير صحيحة');
+                }
+            };
+
+            const handleSend = async (e) => {
+                e.preventDefault();
+                if (!text.trim() || !user) return;
+                setIsSubmitting(true);
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('eid_gifts').add({
+                        name: usernameInput, 
+                        text: text,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    setText('');
+                    setShowSuccess(true);
+                    setTimeout(() => setShowSuccess(false), 5000);
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    setIsSubmitting(false);
+                }
+            };
+
+            const scrollToInput = () => {
+                inputRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            if (loading) return (
+                <div className="h-screen flex items-center justify-center bg-amber-50">
+                    <span className="text-6xl animate-spin">☀️</span>
+                </div>
+            );
+
+            if (!isAuthorized) {
+                return (
+                    <div className="h-screen bg-[#fff9eb] flex items-center justify-center p-4">
+                        <div className="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm border-2 border-amber-200 text-center">
+                            <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                                <span className="text-7xl login-sun-emoji">☀️</span>
+                            </div>
+                            <h2 className="text-2xl font-black text-amber-700 mb-6">بوابة شمس الحياة</h2>
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <input 
+                                    type="text" 
+                                    placeholder="اسم المستخدم" 
+                                    value={usernameInput}
+                                    onChange={(e) => setUsernameInput(e.target.value)}
+                                    className="w-full bg-amber-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-amber-400 text-center font-bold"
+                                />
+                                <input 
+                                    type="password" 
+                                    placeholder="الرمز" 
+                                    value={passwordInput}
+                                    onChange={(e) => setPasswordInput(e.target.value)}
+                                    className="w-full bg-amber-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-amber-400 text-center font-bold"
+                                />
+                                {loginError && <p className="text-red-500 text-xs font-bold">{loginError}</p>}
+                                <button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg">
+                                    دخول
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-[#fffcf0] pb-20">
+                    {isAdmin && (
+                        <div className="bg-amber-500 text-white py-2 px-6 flex items-center justify-center gap-2 shadow-md sticky top-0 z-50">
+                            <Icon name="shield-check" className="w-4 h-4" />
+                            <span className="text-xs font-bold">وضع المسؤول: Raef - عرض كافة الإهداءات الخاصة</span>
+                        </div>
+                    )}
+
+                    <section className="pt-16 pb-8 text-center px-4">
+                        <div className="inline-block bg-white/50 backdrop-blur-sm px-8 py-4 rounded-full border-2 border-amber-200 shadow-sm mb-4">
+                            <h2 className="text-amber-600 font-bold tracking-[0.2em] flex items-center justify-center gap-2 text-sm md:text-base">
+                                <Icon name="sparkles" className="w-4 h-4" />
+                                فرحة العيد مع شمس الحياة
+                                <Icon name="sparkles" className="w-4 h-4" />
+                            </h2>
+                        </div>
+                        <h1 className="text-4xl md:text-7xl font-black text-amber-800 drop-shadow-sm leading-tight">
+                            كل عام وأنتم بخير <br /> 
+                            <span className="text-amber-500 underline decoration-amber-200 decoration-dotted">وعيدكم مبارك</span>
+                        </h1>
+                    </section>
+
+                    <section className="h-[40vh] flex items-center justify-center relative">
+                        <div className="relative">
+                            <div className="text-9xl md:text-[13rem] select-none yellow-pulse-sun">
+                                ☀️
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="flex flex-col items-center justify-center mt-12 px-4 gap-6">
+                        <button 
+                            onClick={() => setShowGiftMessage(!showGiftMessage)}
+                            className="bg-amber-500 text-white px-12 py-5 rounded-full font-black text-xl md:text-3xl shadow-2xl hover:bg-amber-600 transition-all transform hover:scale-110 active:scale-95 flex items-center gap-4 border-4 border-white"
+                        >
+                            <Icon name="gift" className="w-8 h-8" />
+                            رسالة الهدية
+                        </button>
+
+                        {showGiftMessage && (
+                            <div className="w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-amber-400 relative animate-in fade-in zoom-in duration-300">
+                                <button 
+                                    onClick={() => setShowGiftMessage(false)}
+                                    className="absolute top-4 left-4 text-amber-400 hover:text-amber-600"
+                                >
+                                    <Icon name="x" className="w-6 h-6" />
+                                </button>
+                                <div className="text-center">
+                                    <Icon name="sparkles" className="w-10 h-10 text-amber-500 mx-auto mb-4" />
+                                    <h3 className="text-2xl font-black text-amber-800 mb-4">هدية خاصة لشمس الحياة</h3>
+                                    <p className="text-slate-600 text-lg leading-relaxed italic">
+                                        "بمناسبة العيد السعيد، أهديكِ أصدق الدعوات بأن تظلي شمساً تشرق في قلوبنا، وضياءً ينير دروبنا. كل عام وأنتِ العيد لكل من حولك."
+                                    </p>
+                                    <div className="mt-6 flex justify-center gap-2">
+                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce" />
+                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce delay-75" />
+                                        <Icon name="heart" className="text-red-500 fill-red-500 w-5 h-5 animate-bounce delay-150" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="max-w-xl mx-auto px-6 mt-24">
+                        <div ref={inputRef} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-amber-100 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-amber-400 to-orange-500"></div>
+                            <div className="flex items-center gap-3 mb-6 mt-2">
+                                <Icon name="moon" className="text-amber-500 fill-amber-500 w-6 h-6" />
+                                <h3 className="text-2xl font-black text-amber-900">اترك أثرك الجميل</h3>
+                            </div>
+                            
+                            <form onSubmit={handleSend} className="space-y-4">
+                                <textarea 
+                                    placeholder="اكتب تهنئتك أو إهدائك هنا.." 
+                                    value={text}
+                                    onChange={(e) => setText(e.target.value)}
+                                    className="w-full bg-amber-50/50 p-6 rounded-3xl outline-none border-2 border-transparent focus:border-amber-400 h-32 resize-none font-medium text-lg transition-all shadow-inner"
+                                    required
+                                />
+                                
+                                {showSuccess && (
+                                    <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 p-3 rounded-xl animate-in fade-in slide-in-from-top-1">
+                                        <Icon name="check-circle" className="w-5 h-5" />
+                                        <span>تم إرسال إهدائك بنجاح وحفظه للمسؤول!</span>
+                                    </div>
+                                )}
+
+                                <button 
+                                    disabled={isSubmitting}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-200 text-white font-black py-5 rounded-2xl shadow-lg shadow-amber-200 transition-all flex items-center justify-center gap-3 text-xl"
+                                >
+                                    {isSubmitting ? <span className="animate-spin text-2xl text-white">⏳</span> : <Icon name="send" className="w-6 h-6 rotate-180" />}
+                                    حفظ الإهداء في الصفحة
+                                </button>
+                            </form>
+                        </div>
+
+                        {isAdmin && (
+                            <div className="mt-20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-[2px] bg-amber-200 flex-1"></div>
+                                    <span className="text-amber-500 font-black text-sm tracking-widest px-4 py-1 bg-white border border-amber-100 rounded-full">سجل كافة الإهداءات الواردة</span>
+                                    <div className="h-[2px] bg-amber-200 flex-1"></div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 gap-6">
+                                    {dedications.length === 0 ? (
+                                        <div className="text-center py-10 text-amber-200 font-bold italic">
+                                            لا توجد إهداءات محفوظة في السجل بعد..
+                                        </div>
+                                    ) : (
+                                        dedications.map((item) => (
+                                            <div key={item.id} className="bg-white p-8 rounded-[2rem] shadow-md border-2 border-amber-50 hover:border-amber-200 transition-all relative group">
+                                                <div className="absolute -top-3 -right-3 bg-amber-500 text-white p-2 rounded-full shadow-lg">
+                                                    <Icon name="heart" className="w-4 h-4 fill-white" />
+                                                </div>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <span className="font-black text-xl text-amber-700 bg-amber-50 px-4 py-1 rounded-full border border-amber-100">{item.name}</span>
+                                                    <span className="text-xs text-slate-300 font-bold">
+                                                        {item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleDateString('ar-SA') : 'الآن'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-slate-600 text-lg leading-relaxed italic pr-2">
+                                                    "{item.text}"
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <footer className="text-center mt-20 py-10">
+                        <div className="text-amber-300 font-black text-xs uppercase tracking-[0.5em] mb-2">
+                            Sun of Life • Raef • 1427
+                        </div>
+                        <p className="text-amber-100 text-[10px]">نظام آمن ومحفوظ • الخصوصية مفعلة للمسؤول فقط</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
