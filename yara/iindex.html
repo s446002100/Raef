@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ربوووع خييير</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(
+        135deg,
+        #120424 0%,
+        #2e1065 40%,
+        #5b21b6 100%
+    );
+    font-family:Tahoma, Arial, sans-serif;
+    padding:20px;
+    overflow:hidden;
+}
+
+/* النجوم */
+.stars{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(2px 2px at 70% 20%, white, transparent),
+    radial-gradient(1px 1px at 40% 80%, white, transparent),
+    radial-gradient(2px 2px at 85% 70%, white, transparent),
+    radial-gradient(1px 1px at 10% 90%, white, transparent),
+    radial-gradient(2px 2px at 60% 60%, white, transparent),
+    radial-gradient(1px 1px at 90% 10%, white, transparent);
+    animation: twinkle 4s infinite alternate;
+}
+
+@keyframes twinkle{
+    from{opacity:.4;}
+    to{opacity:1;}
+}
+
+/* البطاقة */
+.card{
+    position:relative;
+    z-index:1;
+    width:min(90%,850px);
+    max-height:85vh;
+    background:rgba(255,255,255,0.96);
+    border-radius:30px;
+    padding:35px;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+    backdrop-filter:blur(10px);
+}
+
+h1{
+    text-align:center;
+    color:#6d28d9;
+    margin-bottom:25px;
+    font-size:32px;
+}
+
+.message{
+    font-size:20px;
+    line-height:2;
+    color:#333;
+    max-height:60vh;
+    overflow-y:auto;
+    padding-left:10px;
+}
+
+/* شريط التمرير */
+.message::-webkit-scrollbar{
+    width:8px;
+}
+
+.message::-webkit-scrollbar-track{
+    background:#eee;
+    border-radius:10px;
+}
+
+.message::-webkit-scrollbar-thumb{
+    background:#6d28d9;
+    border-radius:10px;
+}
+
+.footer{
+    margin-top:20px;
+    text-align:center;
+    color:#888;
+    font-size:14px;
+}
+
+/* زر تشغيل الموسيقى */
+.music-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    z-index:2;
+    border:none;
+    background:#6d28d9;
+    color:white;
+    padding:12px 18px;
+    border-radius:50px;
+    cursor:pointer;
+    font-size:15px;
+}
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<button class="music-btn" onclick="toggleMusic()">
+🎵 
+</button>
+
+<audio id="bgMusic" loop>
+    <source src="daaa.mp3" type="audio/mpeg">
+</audio>
+
+<div class="card">
+    <h1>الى دكتورة قلبي </h1>
+
+    <div class="message">
+
+        انا عارف انك قاعده تمري بفتره صعبه وادري انك تعبانه من داخلك حالياً وهذي الهديه مو عشان مناسبة او شي بس قلت احاول اطلعك من المود اللي انتي فيه ومن دائرة القلق والتفكير ومنها تركزي اكتر في اختباراتك وتشدي حيلك يا دكتورة قلبي
+وشايفه الدنيا  كلها بطولها وعرضها 
+كانها اختبار  طويييل يمكن نمر فيها باشياء مو احنا اللي اخترناها ولا كانت بإرادتنا ، بس كُتبت علينا عشان نكبر على يدها ولو الظروف أحياناً  تجي فوق طاقتنا وتقسى علينا وما تكون زي ما احنا نبغاها ، بس دا كلو لحكمة 
+عشان نقوى ونوعى ونصحى ونفهم الحياة اكتر  ونصير افضل 
+والايام ما بتبقى على حالها  والالم اليوم مهما كان له عمر ومهما طال بكرة بيعدي وكل مرحلة كيف ما كانت بتمر 
+واعرفي كويس دام الله عطانا عمر جديد ، ويوم جديد دي فرصة عشان نبدا من جديد ، والعوض مهما طال حيجي لا محاله …
+<p></p>
+    وان شاء الله اني قدرت اسعدك ولو بحاجة بسيطة
+
+    </div>
+
+    <div class="footer">
+       Eng.Raef
+    </div>
+</div>
+
+<script>
+const music = document.getElementById("bgMusic");
+const btn = document.querySelector(".music-btn");
+
+function toggleMusic(){
+    if(music.paused){
+        music.play();
+        btn.innerHTML = "⏸️";
+    }else{
+        music.pause();
+        btn.innerHTML = "🎵";
+    }
+}
+</script>
+
+</body>
+</html>
